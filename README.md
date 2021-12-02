@@ -1,0 +1,1 @@
+USE X86 NOT 64 BIT
