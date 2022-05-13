@@ -1,14 +1,16 @@
 #pragma once
+#include <cstdint>
 class Difficulty;
 struct Vec2i_mi;
 
 class MineField
 {
 public:
+
     bool bomb = false;
     bool covered = true;
     bool flaged = false;
-    char bombcount = 0;
+    uint32_t bombcount = 0;
 
     void initMineField();
 

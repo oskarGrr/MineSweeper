@@ -9,8 +9,8 @@ public:
 
     float ratioXdivY = 0.0f, ratioYdivX = 0.0f;
 
-    uint32_t windowSize_X = 0;
-    uint32_t windowSize_Y = 0;
+    uint32_t initialWindowSize_X = 0;
+    uint32_t initialWindowSize_Y = 0;
 
     Difficulty() = default;
     Difficulty(uint8_t diffOption);

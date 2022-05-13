@@ -6,12 +6,12 @@
 void MineField::initMineField()
 {
     unsigned short x, y;
-    for (int i = 0; i < diff.playSize; ++i)
+    for (int i = 0; i < g_diff.playSize; ++i)
     {
         if (g_mineFieldPtr[i].bomb) continue;
         
-        x = i % diff.width;
-        y = i / diff.width;
+        x = i % g_diff.width;
+        y = i / g_diff.width;
         
         g_mineFieldPtr[i].bombcount =
         (int)isABomb(x + 1, y) +      // right
@@ -28,9 +28,9 @@ void MineField::initMineField()
 void MineField::setRngBombLocations(const short& index)
 {      
     short rngLocation; 
-    for (int i = 0; i < diff.numOfBombs; ++i)
+    for (int i = 0; i < g_diff.numOfBombs; ++i)
     {       
-        rngLocation = rand() % diff.playSize;
+        rngLocation = rand() % g_diff.playSize;
         if (g_mineFieldPtr[rngLocation].bomb == false && rngLocation != index)
         {
             g_mineFieldPtr[rngLocation].bomb = true;
@@ -41,24 +41,25 @@ void MineField::setRngBombLocations(const short& index)
 
 void MineField::fill(const short& x, const short& y)
 {//recursive floodFill function
-    if( x < 0 || x >= diff.width ) return;
+    if( x < 0 || x >= g_diff.width ) return;
 
-    if( y < 0 || y >= diff.height ) return;
+    if( y < 0 || y >= g_diff.height ) return;
 
-    if( g_mineFieldPtr[x + y * diff.width].covered == false ) return;
+    if( g_mineFieldPtr[x + y * g_diff.width].covered == false ) return;
 
-    if( g_mineFieldPtr[x + y * diff.width].bombcount > 0 )
+    if( g_mineFieldPtr[x + y * g_diff.width].bombcount > 0 )
     {
-        g_mineFieldPtr[x + y * diff.width].covered = false;
-        g_tilePtr[x + y * diff.width]->changeTileTexture(g_mineFieldPtr[x + y * diff.width].bombcount);
+        g_mineFieldPtr[x + y * g_diff.width].covered = false;
+        tileTextures type = (tileTextures)g_mineFieldPtr[x + y * g_diff.width].bombcount;
+        g_tilePtr[x + y * g_diff.width]->changeTileTexture(type);
         return;
     }
 
-    if( g_mineFieldPtr[x + y * diff.width].bombcount == 0 )
+    if( g_mineFieldPtr[x + y * g_diff.width].bombcount == 0 )
     {
-        g_mineFieldPtr[x + y * diff.width].covered = false;
-        g_tilePtr[x + y * diff.width]->changeTileTexture(uncovered);
-             
+        g_mineFieldPtr[x + y * g_diff.width].covered = false;
+        g_tilePtr[x + y * g_diff.width]->changeTileTexture(uncovered);
+        
         fill(x + 1, y);             //right
         fill(x + 1, y - 1);        //top right
         fill(x, y - 1);           //top uwu
@@ -74,11 +75,11 @@ bool MineField::winCondition()
 {
     unsigned short win = 0;
 
-    for (int i = 0; i < diff.playSize; i++) 
+    for (int i = 0; i < g_diff.playSize; i++) 
         if (g_mineFieldPtr[i].covered == false) 
             win++;
         
-    if (win == diff.playSize - diff.numOfBombs) return true;
+    if (win == g_diff.playSize - g_diff.numOfBombs) return true;
  
     return false;   
 }
@@ -86,9 +87,9 @@ bool MineField::winCondition()
 //returns true if given x and y coordinates is a bomb
 bool MineField::isABomb(const short& x, const short& y) const
 {//returns true if bomb is at that x,y
-    short index = x + y * diff.width;
-    if (y < 0 || y >= diff.height) return false;
-    if (x < 0 || x >= diff.width) return false;
+    short index = x + y * g_diff.width;
+    if (y < 0 || y >= g_diff.height) return false;
+    if (x < 0 || x >= g_diff.width) return false;
         if(g_mineFieldPtr[index].bomb) 
             return true;
     return false;
@@ -112,7 +113,7 @@ void MineField::setFlagHere(const Vec2i_mi& location)
 
 void MineField::revealBombs(Vec2i_mi& location)
 {//used to reveal bombs on a loss
-    for(int i = 0; i < diff.playSize; ++i)
+    for(int i = 0; i < g_diff.playSize; ++i)
     {
         if(g_mineFieldPtr[i].bomb)
         {
@@ -128,11 +129,11 @@ void MineField::revealBombs(Vec2i_mi& location)
 void MineField::placeRemainingFlags()
 {//places last flags after all the squares that arent bombs have been uncovered
     int c = 0;
-    for(int i = 0; i < diff.playSize; ++i)
+    for(int i = 0; i < g_diff.playSize; ++i)
         if(g_mineFieldPtr[i].covered)
         {
             c++;
-            g_tilePtr[i]->button.setTextureRect({32, 0, TILE_SIZE, TILE_SIZE});
+            g_tilePtr[i]->button.setTextureRect({32, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
         }
 
     for(int i = 0; i < c; i++)

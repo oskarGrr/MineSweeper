@@ -1,4 +1,5 @@
 #pragma once
+enum tileTextures : unsigned int;
 #include <SFML/Graphics.hpp>
 class Difficulty;
 
@@ -17,7 +18,7 @@ public:
            const short& xDiv,
            const short& ydiv);
 
-    void changeTileTexture(const uint8_t& tileTextureType);
+    void changeTileTexture(const tileTextures& tileTextureType);
     bool isMouseOver(sf::RenderWindow& win);
     static void createTiles(sf::Texture& t);
     static void createSegments(sf::Texture& y);

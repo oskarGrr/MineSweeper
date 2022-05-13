@@ -19,16 +19,16 @@ int main()
 {   
     for(;;)
     {
-        srand((unsigned int)time(0));
-        ::diff = createDifficultyWindow();
+        srand((unsigned)time(0));
+        g_diff = createDifficultyWindow();
         mainLoop();
     }
 }
 
 void mainLoop()
 {  
-    sf::RenderWindow msWindow({diff.windowSize_X, diff.windowSize_Y},"Minesweeper");
-    sf::Texture tiles;   
+    sf::RenderWindow msWindow({g_diff.initialWindowSize_X, g_diff.initialWindowSize_Y},"Minesweeper");
+    sf::Texture tiles;
     sf::Texture smileyButton;
     sf::Texture titleBar;
     sf::Texture sevenSegments;
@@ -39,12 +39,12 @@ void mainLoop()
  
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-    float resetButtonX = ((float)(diff.windowSize_X / 2) - (smileyButton.getSize().x / 10)); //x coord val of the the resetbutton
+    float resetButtonX = ((float)(g_diff.initialWindowSize_X / 2) - (smileyButton.getSize().x / 10)); //x coord val of the the resetbutton
     Button resetButton(smileyButton, 0, {resetButtonX, 4.0f}, 5, 1); 
     Button backGroundTitleBar(titleBar, 0, {0,0}, 1, 1);  
     Button::createSegments(sevenSegments);
     Button::createTiles(tiles);
-    g_mineFieldPtr = new MineField[diff.playSize];  
+    g_mineFieldPtr = new MineField[g_diff.playSize];  
     uint8_t leftClickResult = waiting;
     uint8_t gameState = firstClick;
     Vec2i_mi location;
@@ -64,16 +64,18 @@ void mainLoop()
             switch (evnt.type)
             {
             case sf::Event::EventType::Closed:
+            
                 msWindow.close();
                 programRunning = false;
                 clockThread.join();
                 deleteAllocs();
                 exit(0);           
                 break;      
+            
             ///////////////////////////////////////////////////////////////////////////////////////
-            case sf::Event::Resized:
+            case sf::Event::Resized:            
                 keepAspectRatioMain(msWindow);
-                break;
+                break;           
             ///////////////////////////////////////////////////////////////////////////////////////
             case sf::Event::EventType::KeyReleased:// R key restarts the diff selection
                 if(evnt.key.code == sf::Keyboard::R)
@@ -84,8 +86,9 @@ void mainLoop()
                     deleteAllocs();                   
                     return; 
                 }
+                break;
             ///////////////////////////////////////////////////////////////////////////////////////                 
-            case sf::Event::MouseButtonPressed: 
+            case sf::Event::MouseButtonPressed:             
                 location = getMousePositionAndIndex(msWindow);
                 if(evnt.key.code == sf::Mouse::Right)
                 {
@@ -97,9 +100,9 @@ void mainLoop()
                 {
                     resetButton.resetButtonLeftClick(gameState, msWindow);     
                 }
-                break;
+                break;            
             ///////////////////////////////////////////////////////////////////////////////////////
-            case sf::Event::MouseButtonReleased:
+            case sf::Event::MouseButtonReleased:            
                 location = getMousePositionAndIndex(msWindow);
 
                 if(gameState != loss) resetButton.button.setTextureRect({0, 0, 24, 24});
@@ -119,8 +122,10 @@ void mainLoop()
                     resetButton.button.setTextureRect({0, 0, 24, 24});
                 }              
                 break;
-            }
-        }       
+            
+            }//end switch
+        }//end event polling loop
+
         updateScreen(msWindow, backGroundTitleBar.button, resetButton.button);
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
 
@@ -135,8 +140,8 @@ void mainLoop()
                 return;                    
             }
         }
-    }
-}
+    }//end of while(windowIsOpen())
+}//end of function
 
 void deleteAllocs()
 {//this also deletes the segments because this function is called when gameloop exits to reset the difficulty
@@ -144,10 +149,10 @@ void deleteAllocs()
 
     int x = 7;
 
-    if(diff.whichDiff == beginner) 
+    if(g_diff.whichDiff == beginner) 
         x = 5;
 
-    for(int i = 0; i < diff.playSize; ++i)
+    for(int i = 0; i < g_diff.playSize; ++i)
         delete *(g_tilePtr + i); 
 
     for(int i = 0; i < x; i++)
@@ -161,7 +166,7 @@ void deleteAllocs()
 void Timer(bool& startClock, uint8_t& gameState, unsigned int& count, bool& programRunning)
 {
     int index;
-    if(diff.whichDiff == beginner) index = 5;
+    if(g_diff.whichDiff == beginner) index = 5;
     else index = 7;
     while(programRunning)
     {  
@@ -173,13 +178,13 @@ void Timer(bool& startClock, uint8_t& gameState, unsigned int& count, bool& prog
         }
         if(gameState == firstClick) Button::refreshClockSegments();       
         std::this_thread::sleep_for(std::chrono::milliseconds(4));
-    }   
+    }
 }
 
 inline void keepAspectRatioMain(sf::RenderWindow& win)
 {
-    static uint32_t prev_xSize = diff.windowSize_X;
-    static uint32_t prev_ySize = diff.windowSize_Y;
+    static uint32_t prev_xSize = g_diff.initialWindowSize_X;
+    static uint32_t prev_ySize = g_diff.initialWindowSize_Y;
 
     uint32_t new_xSize = win.getSize().x;
     uint32_t new_ySize = win.getSize().y;
@@ -188,11 +193,12 @@ inline void keepAspectRatioMain(sf::RenderWindow& win)
     int diff_ySize = abs((int)new_ySize - (int)prev_ySize);
     
     if(diff_xSize > diff_ySize)    
-        new_ySize = new_xSize * diff.ratioYdivX;    
+        new_ySize = new_xSize * g_diff.ratioYdivX;    
     else if(diff_ySize > diff_xSize)  
-        new_xSize = new_ySize * diff.ratioXdivY;
+        new_xSize = new_ySize * g_diff.ratioXdivY;
         
-    win.setSize({new_xSize, new_ySize});
+    win.setSize({new_xSize, new_ySize});    
+
     prev_xSize = new_xSize;
     prev_ySize = new_ySize;
 }
@@ -282,14 +288,14 @@ void reset(uint8_t& gameState, sf::Texture& tilesTexture, sf::Texture& Segments,
 {
     startClock = false;
 
-    for(int i = 0; i < diff.playSize; ++i) 
+    for(int i = 0; i < g_diff.playSize; ++i) 
     {                 
         delete *(g_tilePtr + i); 
     }//doesnt delete g_segments ptr array or what they point to. this is because if reset is called it still uses the old ones
     delete[] g_mineFieldPtr;
     delete[] g_tilePtr;
 
-    g_mineFieldPtr = new MineField[diff.playSize];
+    g_mineFieldPtr = new MineField[g_diff.playSize];
     
     Button::createTiles(tilesTexture);
 
@@ -300,25 +306,23 @@ void reset(uint8_t& gameState, sf::Texture& tilesTexture, sf::Texture& Segments,
 
 Vec2i_mi getMousePositionAndIndex(sf::RenderWindow& win)
 {    
-    Vec2i_mi tempLocation;
-   
-    tempLocation.xm = sf::Mouse::getPosition(win).x;
-    tempLocation.ym = sf::Mouse::getPosition(win).y;
+    Vec2i_mi ret;
+    
+    ret.xm = sf::Mouse::getPosition(win).x;
+    ret.ym = sf::Mouse::getPosition(win).y;
 
-    tempLocation.x = tempLocation.xm / TILE_SIZE;
-    tempLocation.y = (tempLocation.ym - TITLE_BAR_SIZEY ) / TILE_SIZE;
+    const float ratio = g_diff.initialWindowSize_Y / (float)INITIAL_TITLE_BAR_SIZEY;
+    const float currTitleBarHeight = win.getSize().y / ratio;
 
-    tempLocation.isTileClick = isMouseInsideField(tempLocation.xm, tempLocation.ym);
+    //the tiles are always squares so use this for y and x
+    const float currentTileSize = win.getSize().x / (float)g_diff.width;
 
-    tempLocation.index = tempLocation.x + tempLocation.y * diff.width;
+    ret.isTileClick = (ret.ym >= currTitleBarHeight);
+    ret.x = ret.xm / currentTileSize;
+    ret.y = (ret.ym - currTitleBarHeight) / currentTileSize;
+    ret.index = ret.x + ret.y * g_diff.width;
 
-    return tempLocation;
-}
-
-inline bool isMouseInsideField(short& xm, short& ym)
-{
-     if(xm <= diff.windowSize_X && ym <= diff.windowSize_Y + TITLE_BAR_SIZEY && ym >= TITLE_BAR_SIZEY) return true;
-     return false; 
+    return ret;
 }
 
 void setEndScreenSegments(Button* endSegments, unsigned int& count)
@@ -439,9 +443,9 @@ bool finalWindow(uint8_t& gameState, unsigned int& count)
 
 inline const char* titleBarSelection()
 {
-    if(diff.whichDiff == beginner) return "textures/titlebar.png";
-    if(diff.whichDiff == easy) return "textures/titlebarEASY.png";
-    if(diff.whichDiff == medium) return "textures/titlebarMEDIUM.png";
+    if(g_diff.whichDiff == beginner) return "textures/titlebar.png";
+    if(g_diff.whichDiff == easy) return "textures/titlebarEASY.png";
+    if(g_diff.whichDiff == medium) return "textures/titlebarMEDIUM.png";
     return "textures/titlebarHARD.png";
 }
 
@@ -457,12 +461,12 @@ inline void updateScreen(sf::RenderWindow& msWindow, sf::Sprite& titleBar, sf::S
 {
     msWindow.clear();
 
-    for (int i = 0; i < diff.playSize; ++i)
+    for (int i = 0; i < g_diff.playSize; ++i)
         msWindow.draw(g_tilePtr[i]->button); 
 
     msWindow.draw(titleBar);
 
-    for (int i = 0; i < diff.numOfSegments; ++i)
+    for (int i = 0; i < g_diff.numOfSegments; ++i)
         msWindow.draw(g_segmentsPtr[i]->button);
 
     msWindow.draw(resetButton);
