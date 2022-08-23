@@ -18,7 +18,7 @@ public:
            const short& xDiv,
            const short& ydiv);
 
-    void changeTileTexture(const tileTextures& tileTextureType);
+    void changeTileTexture(tileTextures tileTextureType);
     bool isMouseOver(sf::RenderWindow& win);
     static void createTiles(sf::Texture& t);
     static void createSegments(sf::Texture& y);

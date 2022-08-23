@@ -23,7 +23,7 @@ Button::Button(const sf::Texture& t, const int& xStart,
     button.setTextureRect({tSize_x * xStart, 0, tSize_x, tSize_y});
 }
 
-void Button::changeTileTexture(const tileTextures& tileTextureType)
+void Button::changeTileTexture(tileTextures tileTextureType)
 {  
     switch(tileTextureType)
     {
