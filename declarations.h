@@ -1,4 +1,3 @@
-
 // holds declarations for functions in main.cpp global variables and definitions for enumerations
 
 #pragma once

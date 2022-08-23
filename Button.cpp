@@ -27,59 +27,28 @@ void Button::changeTileTexture(const tileTextures& tileTextureType)
 {  
     switch(tileTextureType)
     {
-    case uncovered:
-        button.setTextureRect({16, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case one:
-        button.setTextureRect({0,  16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case two:
-        button.setTextureRect({16, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case three:
-        button.setTextureRect({32, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case four:
-        button.setTextureRect({48, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case five:
-        button.setTextureRect({64, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case six:
-        button.setTextureRect({80, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case seven:
-        button.setTextureRect({96, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case eight:
-        button.setTextureRect({112,16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case mine:
-        button.setTextureRect({80, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case redBomb:
-        button.setTextureRect({96, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case bombCrossed:
-        button.setTextureRect({112,0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case flag:
-        button.setTextureRect({32, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
-    case hidden:
-        button.setTextureRect({0, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
-        break;
+    case uncovered:   button.setTextureRect({16, 0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case one:         button.setTextureRect({0,  16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case two:         button.setTextureRect({16, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case three:       button.setTextureRect({32, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case four:        button.setTextureRect({48, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case five:        button.setTextureRect({64, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case six:         button.setTextureRect({80, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case seven:       button.setTextureRect({96, 16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case eight:       button.setTextureRect({112,16, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case mine:        button.setTextureRect({80, 0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case redBomb:     button.setTextureRect({96, 0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case bombCrossed: button.setTextureRect({112,0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case flag:        button.setTextureRect({32, 0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;
+    case hidden:      button.setTextureRect({ 0, 0,  INITIAL_TILE_SIZE, INITIAL_TILE_SIZE}); break;    
     }
 }
-#include <iostream>
+
 bool Button::isMouseOver(sf::RenderWindow& win) //only used on diff selection windown and reset buttons
 {//returns true if the mouse is over a Button
 
-    //auto mousePos = sf::Mouse::getPosition(win);
-
     float btnPosX = this->button.getPosition().x;
     float btnPosY = this->button.getPosition().y;
-
     float btnWidth  = this->button.getLocalBounds().width;
     float btnHeight = this->button.getLocalBounds().height;
 

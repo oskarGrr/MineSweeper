@@ -141,7 +141,7 @@ void mainLoop()
             }
         }
     }//end of while(windowIsOpen())
-}//end of function
+}
 
 void deleteAllocs()
 {//this also deletes the segments because this function is called when gameloop exits to reset the difficulty
