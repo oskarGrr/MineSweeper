@@ -1,4 +1,7 @@
 .vs/
+.Release/
+.Debug/
+*.obj
 Minesweeper.aps
 Minesweeper.vcxproj.filters
 Minesweeper.vcxproj.user
