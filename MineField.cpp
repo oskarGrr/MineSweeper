@@ -1,141 +1,206 @@
+#include <cassert>
 #include "MineField.h"
 #include "Difficulty.h"
-#include "declarations.h"
-#include "button.h"
+#include "MineSweeperApp.h"
+#include "FlagCounter.h"
+#include "textureWrapper.h"
 
-void MineField::initMineField()
+MineField::MineField(float titleBarHeight) : m_tiles{Difficulty::get().getFieldNumOfTiles()}
 {
-    unsigned short x, y;
-    for (int i = 0; i < g_diff.playSize; ++i)
+    auto& texture = TextureWrapper::getTexture(TextureIndicies::TILES);
+    for(auto& tile : m_tiles)
     {
-        if (g_mineFieldPtr[i].bomb) continue;
+        tile.m_sprite.setTexture(texture);
+        tile.changeTile(Tile::TileTypes::COVERED);
+    }
+
+    setTilePositions(titleBarHeight);
+}
+
+//calculate and init all the tiles' m_bombCount after setRngBombLocations() is called
+void MineField::calcAndSetBombCounts()
+{
+    auto& diff = Difficulty::get();
+    auto numOfTiles = diff.getFieldNumOfTiles(), tileWidth = diff.getFieldWidth();
+    int x = 0, y = 0;
+    for(int i = 0; i < numOfTiles; ++i)
+    {
+        if (m_tiles[i].m_isBomb) continue;
         
-        x = i % g_diff.width;
-        y = i / g_diff.width;
+        x = i % tileWidth;
+        y = i / tileWidth;
         
-        g_mineFieldPtr[i].bombcount =
-        (int)isABomb(x + 1, y) +      // right
-        (int)isABomb(x + 1, y - 1) +  // right and up
-        (int)isABomb(x, y - 1) +      // up
-        (int)isABomb(x - 1, y - 1) +  // up and left
-        (int)isABomb(x - 1, y) +      // left
-        (int)isABomb(x - 1, y + 1) +  // left and down
-        (int)isABomb(x, y + 1) +      // down
-        (int)isABomb(x + 1, y + 1);   // down and right
+        m_tiles[i].m_numSurroundingBombs =
+        isABomb({x + 1, y})     + //right
+        isABomb({x + 1, y - 1}) + //top right
+        isABomb({x, y - 1})     + //top
+        isABomb({x - 1, y - 1}) + //top left
+        isABomb({x - 1, y})     + //left
+        isABomb({x - 1, y + 1}) + //bottom left
+        isABomb({x, y + 1})     + //bottom
+        isABomb({x + 1, y + 1});  //bottom right
     }
 }
 
-void MineField::setRngBombLocations(const short& index)
-{      
-    short rngLocation; 
-    for (int i = 0; i < g_diff.numOfBombs; ++i)
-    {       
-        rngLocation = rand() % g_diff.playSize;
-        if (g_mineFieldPtr[rngLocation].bomb == false && rngLocation != index)
+//puts the tiles in the right place on the screen depending on the feild size
+void MineField::setTilePositions(float titleBarHeight)
+{
+    auto const& diff = Difficulty::get();
+    auto tileWidth = diff.getFieldWidth();
+    const auto tileCount = m_tiles.size();
+    for(int i = 0; i < tileCount; ++i)
+    {
+        sf::Vector2f newPosition
         {
-            g_mineFieldPtr[rngLocation].bomb = true;
-        }                
+            static_cast<float>(i % tileWidth * INITIAL_TILE_SIZE),
+            (i / tileWidth * INITIAL_TILE_SIZE) + titleBarHeight
+        };
+
+        m_tiles[i].setTilePosition(newPosition);
+    }
+}
+
+bool MineField::areTileCoordsInRange(sf::Vector2i const & coords)
+{
+    auto const& diff = Difficulty::get();
+    auto mineFieldWidth = diff.getFieldWidth();
+    auto mineFieldHeight = diff.getFieldHeight();
+
+    return coords.x < mineFieldWidth  && coords.x >= 0 &&
+           coords.y < mineFieldHeight && coords.y >= 0;
+}
+
+void MineField::setRngBombLocations(sf::Vector2i const& firstTileClickCoords)
+{
+    int index = MineSweeperApp::coordsToIndex(firstTileClickCoords);
+    int rngLocation;
+    auto& diff = Difficulty::get();
+    auto numOfBombs = diff.getBombCount();
+    for(int i = 0; i < numOfBombs; ++i)
+    {
+        rngLocation = rand() % diff.getFieldNumOfTiles();
+        if(!m_tiles[rngLocation].m_isBomb && rngLocation != index)
+        {
+            m_tiles[rngLocation].m_isBomb = true;
+        }
         else --i;
     }
 }
 
-void MineField::fill(const short& x, const short& y)
-{//recursive floodFill function
-    if( x < 0 || x >= g_diff.width ) return;
-
-    if( y < 0 || y >= g_diff.height ) return;
-
-    if( g_mineFieldPtr[x + y * g_diff.width].covered == false ) return;
-
-    if( g_mineFieldPtr[x + y * g_diff.width].bombcount > 0 )
+//put a flag down on the field. does not update the flag counter.
+//if there is already a flag at location then removes the flag
+void MineField::setFlagHere(sf::Vector2i const& location, FlagCounter& fc)
+{
+    auto index = MineSweeperApp::coordsToIndex(location);
+    if(m_tiles[index].m_isFlagged)
     {
-        g_mineFieldPtr[x + y * g_diff.width].covered = false;
-        tileTextures type = (tileTextures)g_mineFieldPtr[x + y * g_diff.width].bombcount;
-        g_tilePtr[x + y * g_diff.width]->changeTileTexture(type);
+        m_tiles[index].m_isFlagged = false;
+        m_tiles[index].changeTile(Tile::TileTypes::COVERED);
+        ++fc;
+    }
+    else if(m_tiles[index].m_isCovered)
+    {
+        m_tiles[index].m_isFlagged = true;
+        m_tiles[index].changeTile(Tile::TileTypes::FLAG);
+        --fc;
+    }
+}
+
+void MineField::floodFill(sf::Vector2i const& coords)
+{
+    auto const tileHeight = Difficulty::get().getFieldHeight();
+    auto const tileWidth = Difficulty::get().getFieldWidth();
+    auto const index = MineSweeperApp::coordsToIndex(coords);
+
+    //base cases
+    if(coords.x < 0 || coords.x >= tileWidth) return;
+    if(coords.y < 0 || coords.y >= tileHeight) return;
+    if(!m_tiles[index].m_isCovered) return;
+    if(m_tiles[index].m_numSurroundingBombs > 0)
+    {
+        m_tiles[index].m_isCovered = false;
+        m_tiles[index].changeTileBasedOnBombCount();
         return;
     }
 
-    if( g_mineFieldPtr[x + y * g_diff.width].bombcount == 0 )
+    if(m_tiles[index].m_numSurroundingBombs == 0)
     {
-        g_mineFieldPtr[x + y * g_diff.width].covered = false;
-        g_tilePtr[x + y * g_diff.width]->changeTileTexture(uncovered);
+        m_tiles[index].m_isCovered = false;
+        //g_tilePtr[x + y * g_diff.width]->changeTileTexture(UNCOVERED);
+        m_tiles[index].changeTile(Tile::TileTypes::UNCOVERED);
         
-        fill(x + 1, y);             //right
-        fill(x + 1, y - 1);        //top right
-        fill(x, y - 1);           //top uwu
-        fill(x - 1, y - 1);      //top left
-        fill(x - 1, y);         //left
-        fill(x - 1, y + 1);    //bottom left
-        fill(x, y + 1);       //bottom uwu
-        fill(x + 1, y + 1);  //bottom right        
+        floodFill({coords.x + 1, coords.y    });  //right
+        floodFill({coords.x + 1, coords.y - 1});  //top right
+        floodFill({coords.x,     coords.y - 1});  //top 
+        floodFill({coords.x - 1, coords.y - 1});  //top left
+        floodFill({coords.x - 1, coords.y    });  //left
+        floodFill({coords.x - 1, coords.y + 1});  //bottom left
+        floodFill({coords.x,     coords.y + 1});  //bottom 
+        floodFill({coords.x + 1, coords.y + 1});  //bottom right
     }
 }
 
-bool MineField::winCondition()
+bool MineField::isFlagged(sf::Vector2i const& coords) const
 {
-    unsigned short win = 0;
-
-    for (int i = 0; i < g_diff.playSize; i++) 
-        if (g_mineFieldPtr[i].covered == false) 
-            win++;
-        
-    if (win == g_diff.playSize - g_diff.numOfBombs) return true;
- 
-    return false;   
+    if(!areTileCoordsInRange(coords)) return false;
+    return m_tiles[MineSweeperApp::coordsToIndex(coords)].m_isFlagged;
 }
 
-//returns true if given x and y coordinates is a bomb
-bool MineField::isABomb(const short& x, const short& y) const
-{//returns true if bomb is at that x,y
-    short index = x + y * g_diff.width;
-    if (y < 0 || y >= g_diff.height) return false;
-    if (x < 0 || x >= g_diff.width) return false;
-        if(g_mineFieldPtr[index].bomb) 
-            return true;
-    return false;
+//returns true if given x and y coordinates is a bomb and
+//false if that tile isnt a bomb or the coords are out of range
+bool MineField::isABomb(sf::Vector2i const& coords) const
+{
+    if(!areTileCoordsInRange(coords)) return false;
+    return m_tiles[MineSweeperApp::coordsToIndex(coords)].m_isBomb;
 }
 
-void MineField::setFlagHere(const Vec2i_mi& location)
-{       
-    if( g_mineFieldPtr[location.index].flaged )
-    {
-        g_mineFieldPtr[location.index].flaged = false;
-        Button::incrementFlagDisplay(2);        
-        g_tilePtr[location.index]->changeTileTexture(hidden);
-    }
-    else if (g_mineFieldPtr[location.index].covered)
-    {
-        g_mineFieldPtr[location.index].flaged = true;
-        Button::decrementFlagDisplay(2);
-        g_tilePtr[location.index]->changeTileTexture(flag);
-    }
+bool MineField::isCovered(sf::Vector2i const& coords) const
+{
+    assert(areTileCoordsInRange(coords));
+    return m_tiles[MineSweeperApp::coordsToIndex(coords)].isCovered();
 }
 
-void MineField::revealBombs(Vec2i_mi& location)
-{//used to reveal bombs on a loss
-    for(int i = 0; i < g_diff.playSize; ++i)
+//used to reveal all the bombs when the player clicks on a bomb
+void MineField::revealBombs(sf::Vector2i const& clickedBombLocation)
+{
+    for(auto& tile : m_tiles)
     {
-        if(g_mineFieldPtr[i].bomb)
+        if(tile.m_isBomb)
         {
-            if(g_mineFieldPtr[i].flaged) continue;
-            g_tilePtr[i]->changeTileTexture(mine);            
-        }                  
-        else if(g_mineFieldPtr[i].flaged)      
-            g_tilePtr[i]->changeTileTexture(bombCrossed);//if not a bomb and also a flag then bomb with red cross            
-    }
-    g_tilePtr[location.index]->changeTileTexture(redBomb); //location is the spot the bomb was clicked
-}
-
-void MineField::placeRemainingFlags()
-{//places last flags after all the squares that arent bombs have been uncovered
-    int c = 0;
-    for(int i = 0; i < g_diff.playSize; ++i)
-        if(g_mineFieldPtr[i].covered)
-        {
-            c++;
-            g_tilePtr[i]->button.setTextureRect({32, 0, INITIAL_TILE_SIZE, INITIAL_TILE_SIZE});
+            if(tile.m_isFlagged) continue;
+            tile.changeTile(Tile::TileTypes::BOMB);
         }
+        else if(tile.m_isFlagged)
+        {
+            tile.changeTile(Tile::TileTypes::BOMB_CROSSED);
+        }
+    }
 
-    for(int i = 0; i < c; i++)
-        Button::decrementFlagDisplay(2);
+    auto index = MineSweeperApp::coordsToIndex(clickedBombLocation);
+    m_tiles[index].changeTile(Tile::TileTypes::RED_BOMB);
+}
+
+//if the user won but didnt place all the flags on the bombs,  
+//this finishes placing all the flags on the bombs for them
+void MineField::placeRemainingFlags(FlagCounter& flagCounter)
+{
+    for(auto& tile : m_tiles)
+    {
+        //if the user forgot to set a flag on a bomb before winning
+        if(tile.m_isBomb && !tile.m_isFlagged)
+            tile.changeTile(Tile::TileTypes::FLAG);
+    }
+
+    //now that all the flags have been placed the flag counter should be zero
+    flagCounter.zeroOutCounter();
+}
+
+//reset field to default tiles.
+void MineField::resetTiles()
+{
+    for(auto& tile : m_tiles)
+    {
+        tile.resetTile();
+        tile.changeTile(Tile::TileTypes::COVERED);
+    }
 }

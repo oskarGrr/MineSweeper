@@ -1,17 +1,32 @@
 #include "TextStuff.h"
 #include <SFML/Graphics.hpp>
 
-TextStuff::TextStuff(const char* text, sf::Vector2f location, const char* fDirectory, const int charSize, sf::Color clr)
+sf::Font& TextStuff::getFont()
 {
-    f.loadFromFile(fDirectory);
-    t.setFont(f);
-    t.setString(text);
-    t.setPosition(location);
-    t.setCharacterSize(charSize);
-    t.setFillColor(clr);
+    static sf::Font font;
+  
+    if(static bool isInit = false; !isInit)
+    {
+        font.loadFromFile("fonts/FRSCRIPT.TTF");
+        isInit = true;
+    }
+
+    return font;
 }
 
-void TextStuff::setTextColor(sf::Color clr)
+TextStuff::TextStuff(const char* text, sf::Vector2f location, std::size_t txtSize, sf::Color clr)
+    //: m_txt{text, getFont(), }
 {
-    t.setFillColor(clr);
+    m_txt.setFont(getFont());
+    m_txt.setString(text);
+    m_txt.setPosition(location);
+    m_txt.setCharacterSize(txtSize);
+    m_txt.setFillColor(clr);
+    auto const localBounds = m_txt.getLocalBounds();
+    m_txt.setOrigin({localBounds.width / 2, localBounds.height / 2});
+}
+
+void TextStuff::setColor(sf::Color clr)
+{
+    m_txt.setFillColor(clr);
 }

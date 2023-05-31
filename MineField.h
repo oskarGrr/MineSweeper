@@ -1,24 +1,47 @@
 #pragma once
 #include <cstdint>
-class Difficulty;
-struct Vec2i_mi;
+#include <vector>
+#include "SmileyButton.h"
+#include "Tile.h"
+
+class  Difficulty;
+struct LeftClickInfo;
+class  FlagCounter;
 
 class MineField
 {
 public:
 
-    bool bomb = false;
-    bool covered = true;
-    bool flaged = false;
-    uint32_t bombcount = 0;
+    //title bar height needed in order to know where 
+    //to place the tiles on the screen
+    MineField(float titleBarHeight);
+    ~MineField()=default;
 
-    void initMineField();
+    MineField(MineField const&)=delete;
+    MineField(MineField&&)=delete;
+    MineField& operator=(MineField const&)=delete;
+    MineField& operator=(MineField&&)= delete;
 
-    void setRngBombLocations(const short& index);
-    static void fill(const short& x, const short& y);
-    static bool winCondition();
-    bool isABomb(const short& x, const short& y) const;
-    static void setFlagHere(const Vec2i_mi& location);
-    static void revealBombs(Vec2i_mi& location);
-    static void placeRemainingFlags();
+    //rests tiles to default tile values
+    void resetTiles();
+
+    auto const& getTiles() const {return m_tiles;}
+    void floodFill(sf::Vector2i const& coords);
+    bool isFlagged(sf::Vector2i const& coords) const;
+    bool isABomb(sf::Vector2i const& coords) const;
+    bool isCovered(sf::Vector2i const& coords) const;
+    void revealBombs(sf::Vector2i const& clickedBombLocation);
+    void calcAndSetBombCounts();//calculate and init all the tiles' m_bombCount after setRngBombLocations() is called
+    void setRngBombLocations(sf::Vector2i const& firstTileClickCoords);
+    void setFlagHere(sf::Vector2i const& location, FlagCounter& fc);
+    void setTilePositions(float titleBarHeight);//puts the tiles in the right place on the screen depending on the feild size
+
+    //if the user won but didnt place all the flags, this finishes 
+    //placing all the flags on the uncovered bombs for them
+    void placeRemainingFlags(FlagCounter& flagCounter);
+
+private:
+    static bool areTileCoordsInRange(sf::Vector2i const& coords);
+
+    std::vector<Tile> m_tiles;
 };

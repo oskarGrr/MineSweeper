@@ -1,17 +1,46 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include  <cstdint>
 
 class Difficulty
 {
 public:
-    short numOfBombs = 0, width = 0, height = 0, playSize = 0, numOfSegments = 0,
-          whichDiff = 0, flagCount = 0;
 
-    float ratioXdivY = 0.0f, ratioYdivX = 0.0f;
+    enum Options : uint32_t
+    {
+        INVALID,
+        BEGINNER,
+        EASY,
+        MEDIUM,
+        HARD
+    };
 
-    uint32_t initialWindowSize_X = 0;
-    uint32_t initialWindowSize_Y = 0;
+    static auto& get() {return s_theDifficulty;}
+    
+    auto getFieldWidth() const {return m_fieldWidth;}
+    auto getFieldHeight() const {return m_fieldHeight;}
+    auto getFieldNumOfTiles() const {return m_fieldHeight * m_fieldWidth;}
+    auto getBombCount() const {return m_bombCount;}
+    auto getDifficultyOption() const {return m_whichDifficultyOption;}
 
-    Difficulty() = default;
-    Difficulty(uint8_t diffOption);
+    void changeDifficulty(const Options);
+
+private:
+
+    Difficulty()=default;
+    ~Difficulty()=default;
+
+    Difficulty(Difficulty const&)=delete;
+    Difficulty(Difficulty&&)=delete;
+    Difficulty& operator=(Difficulty const&)=delete;
+    Difficulty& operator=(Difficulty&&)=delete;
+
+    static Difficulty s_theDifficulty;
+
+    Options m_whichDifficultyOption {INVALID};
+    int m_bombCount     {0};
+    int m_fieldWidth    {0};
+    int m_fieldHeight   {0};
+    int m_numOfSegments {0};
+    int m_flagCount     {0};
 };

@@ -1,60 +1,37 @@
 #include "Difficulty.h"
-#include "Declarations.h"
+#include <cassert>
 
-Difficulty::Difficulty(uint8_t diffOption) 
+Difficulty Difficulty::s_theDifficulty;
+
+void Difficulty::changeDifficulty(const Options difficultyOption)
 {
-    switch(diffOption)
+    switch(difficultyOption)
     {
-    case beginner:
-        numOfBombs = 10;
-        width = 8;
-        height = 8;
-        initialWindowSize_X = 128u;
-        initialWindowSize_Y = 128u + INITIAL_TITLE_BAR_SIZEY;
-        ratioXdivY = (float)initialWindowSize_X / (float)initialWindowSize_Y;
-        ratioYdivX = (float)initialWindowSize_Y / (float)initialWindowSize_X;
-        whichDiff = beginner;
-        playSize = width * height;
-        flagCount = numOfBombs;
-        numOfSegments = 6;
+    case BEGINNER:
+        m_bombCount = 10;
+        m_fieldWidth = 8;
+        m_fieldHeight = 8;
+        m_numOfSegments = 6;
         break;
-    case easy:
-        numOfBombs = 40;
-        width = 16;
-        height = 16;
-        initialWindowSize_X = 256u;
-        initialWindowSize_Y = 256u + INITIAL_TITLE_BAR_SIZEY;
-        ratioXdivY = (float)initialWindowSize_X / (float)initialWindowSize_Y;
-        ratioYdivX = (float)initialWindowSize_Y / (float)initialWindowSize_X;
-        whichDiff = easy;
-        playSize = width * height;
-        flagCount = numOfBombs;
-        numOfSegments = 8;
+    case EASY:
+        m_bombCount = 40;
+        m_fieldWidth = 16;
+        m_fieldHeight = 16;
+        m_numOfSegments = 8;
         break;
-    case medium:
-        numOfBombs = 85;
-        width = 30;
-        height = 16;
-        initialWindowSize_X = 480u;
-        initialWindowSize_Y = 256u + INITIAL_TITLE_BAR_SIZEY;
-        ratioXdivY = (float)initialWindowSize_X / (float)initialWindowSize_Y;
-        ratioYdivX = (float)initialWindowSize_Y / (float)initialWindowSize_X;
-        whichDiff = medium;
-        playSize = width * height;
-        flagCount = numOfBombs;
-        numOfSegments = 8;
+    case MEDIUM:
+        m_bombCount = 85;
+        m_fieldWidth = 30;
+        m_fieldHeight = 16;      
+        m_numOfSegments = 8;
         break;
-    case hard:
-        numOfBombs = 230;
-        width = 48;
-        height = 24;
-        initialWindowSize_X = 768u;
-        initialWindowSize_Y = 384u + INITIAL_TITLE_BAR_SIZEY;
-        ratioXdivY = (float)initialWindowSize_X / (float)initialWindowSize_Y;
-        ratioYdivX = (float)initialWindowSize_Y / (float)initialWindowSize_X;
-        whichDiff = hard;
-        playSize = width * height;
-        flagCount = numOfBombs;
-        numOfSegments = 8;
+    case HARD:
+        m_bombCount = 230;
+        m_fieldWidth = 48;
+        m_fieldHeight = 24;
+        m_numOfSegments = 8;
     }
+
+    m_whichDifficultyOption = difficultyOption;
+    m_flagCount = m_bombCount;
 }

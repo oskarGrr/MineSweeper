@@ -1,18 +1,17 @@
-﻿  Button.cpp
-  MineField.cpp
-  main.cpp
-C:\Users\grant\source\repos\Minesweeper\main.cpp(196,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(198,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(219,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(221,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(241,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(243,31): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(321,20): warning C4244: '=': conversion from 'float' to 'short', possible loss of data
-C:\Users\grant\source\repos\Minesweeper\main.cpp(322,43): warning C4244: '=': conversion from 'float' to 'short', possible loss of data
+﻿  MineSweeperWindow.cpp
+C:\Users\grant\source\repos\Minesweeper\MineSweeperWindow.cpp(37,31): warning C4244: '=': conversion from 'float' to 'T', possible loss of data
+          with
+          [
+              T=unsigned int
+          ]
+C:\Users\grant\source\repos\Minesweeper\MineSweeperWindow.cpp(39,31): warning C4244: '=': conversion from 'float' to 'T', possible loss of data
+          with
+          [
+              T=unsigned int
+          ]
   Generating code
-  Previous IPDB and IOBJ mismatch, fall back to full compilation.
-C:\Users\grant\source\repos\Minesweeper\main.cpp(442): warning C4715: 'finalWindow': not all control paths return a value
-C:\Users\grant\source\repos\Minesweeper\main.cpp(592): warning C4715: 'createDifficultyWindow': not all control paths return a value
-  All 223 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  0 of 605 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Minesweeper.vcxproj -> C:\Users\grant\source\repos\Minesweeper\Release\Minesweeper.exe

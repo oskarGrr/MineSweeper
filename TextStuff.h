@@ -4,14 +4,11 @@
 class TextStuff
 {
 public:
-    sf::Text t;
-    sf::Font f;
+    sf::Text m_txt;
+    static sf::Font& getFont();//same font for all txt
 
-    TextStuff() = delete;
+    TextStuff(const char* text, sf::Vector2f location, std::size_t txtSize, sf::Color clr);
+    ~TextStuff()=default;
 
-    TextStuff(const char* text, sf::Vector2f location, 
-              const char* fDirectory, const int charSize, 
-        sf::Color clr);
-
-    void setTextColor(sf::Color clr);
+    void setColor(sf::Color clr);
 };
