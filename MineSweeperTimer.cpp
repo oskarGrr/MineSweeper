@@ -46,7 +46,7 @@ Timer::~Timer()
 //the timer method that runs inside the timer thread
 void Timer::RunTimer(std::atomic<bool> const& isMainWindowOpen)
 {
-    while(isMainWindowOpen.load())
+    while(isMainWindowOpen.load(std::memory_order_acquire))
     {
         std::unique_lock lock{m_timerMutex};
         while(!m_isClockRunning)

@@ -77,7 +77,7 @@ void MineSweeperApp::mainWindowLoop()
         }
     }
 
-    isMainWindowOpen.store(false);
+    isMainWindowOpen.store(false, std::memory_order_release);
 }
 
 //called once per loop in mainWindowLoop() to handle the sfml events
