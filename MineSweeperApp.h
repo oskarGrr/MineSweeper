@@ -62,7 +62,7 @@ private:
         SmileyButton& resetButton);
     void firstClickRoutine(Timer&, sf::Vector2i const& firstTileClickCoords, MineField& field);
     void mainWindowLoop();
-    void mainWndHandleEvents(Window& win, Timer& timer, 
+    bool mainWndHandleEvents(Window& win, Timer& timer, 
         SmileyButton& resetButton, FlagCounter& flagCounter, MineField& field);
     bool difficultyWindowLoop();
 

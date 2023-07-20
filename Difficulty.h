@@ -41,6 +41,4 @@ private:
     int m_bombCount     {0};
     int m_fieldWidth    {0};
     int m_fieldHeight   {0};
-    int m_numOfSegments {0};
-    int m_flagCount     {0};
 };

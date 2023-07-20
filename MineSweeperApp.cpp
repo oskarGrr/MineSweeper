@@ -62,7 +62,7 @@ void MineSweeperApp::mainWindowLoop()
 
     while(mainWnd.isWindowOpen())
     {
-        mainWndHandleEvents(mainWnd, timer, resetButton, flagCounter, field);
+        if( !mainWndHandleEvents(mainWnd, timer, resetButton, flagCounter, field) ) {break;}
         mainWindowDraw(mainWnd, field, timer, flagCounter, titleBar, resetButton.getSprite());
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
         if(m_gameState == GameStates::WIN)
@@ -80,8 +80,9 @@ void MineSweeperApp::mainWindowLoop()
     isMainWindowOpen.store(false, std::memory_order_release);
 }
 
-//called once per loop in mainWindowLoop() to handle the sfml events
-void MineSweeperApp::mainWndHandleEvents(Window& win, Timer& timer, SmileyButton& resetButton, 
+//called once per loop in mainWindowLoop() to handle the sfml events.
+//returns false when the window has been closed.
+bool MineSweeperApp::mainWndHandleEvents(Window& win, Timer& timer, SmileyButton& resetButton, 
     FlagCounter& flagCounter, MineField& field)
 {
     sf::Event event;
@@ -93,7 +94,7 @@ void MineSweeperApp::mainWndHandleEvents(Window& win, Timer& timer, SmileyButton
         {
             win.closeWindow();
             m_isAppRunning = false;
-            return;
+            return false;
         }
         case sf::Event::Resized:
         {
@@ -105,7 +106,7 @@ void MineSweeperApp::mainWndHandleEvents(Window& win, Timer& timer, SmileyButton
             if(event.key.code == sf::Keyboard::R)
             {
                 win.closeWindow();
-                return;
+                return false;
             }
             break;
         }
@@ -119,6 +120,8 @@ void MineSweeperApp::mainWndHandleEvents(Window& win, Timer& timer, SmileyButton
             break;
         }
     }
+
+    return true;
 }
 
 //called on mouse button pressed event from mainWndHandleEvents()

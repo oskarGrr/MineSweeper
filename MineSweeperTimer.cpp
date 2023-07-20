@@ -51,7 +51,7 @@ void Timer::RunTimer(std::atomic<bool> const& isMainWindowOpen)
         std::unique_lock lock{m_timerMutex};
         while(!m_isClockRunning)
         {
-            //was the timer reset as opposed to just paused 
+            //was the timer reset as opposed to just paused
             //or a spurious condition variable signal
             if(m_wasTimerReset)
             {
@@ -85,11 +85,11 @@ void Timer::resetTimer()
     m_shouldClockRunCond.notify_one();
 }
 
-//go up by one tenth of a second / 100ms
+//go up by one tenth of a second (100 milliseconds)
 void Timer::incrementClock()
 {
     ++m_tenthsOfSecondPassed;
-   
+    
     //go in reverse since the least significant segment is at the back of vector
     for(auto& segment : std::views::reverse(m_7segmentDisplay))
     {
