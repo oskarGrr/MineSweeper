@@ -156,8 +156,9 @@ bool MineField::isABomb(sf::Vector2i const& coords) const
 
 bool MineField::isCovered(sf::Vector2i const& coords) const
 {
-    assert(areTileCoordsInRange(coords));
-    return m_tiles[MineSweeperApp::coordsToIndex(coords)].isCovered();
+    if(areTileCoordsInRange(coords))
+        return m_tiles[MineSweeperApp::coordsToIndex(coords)].isCovered();
+    return false;
 }
 
 //used to reveal all the bombs when the player clicks on a bomb

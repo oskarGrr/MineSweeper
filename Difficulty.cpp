@@ -13,6 +13,7 @@ void Difficulty::changeDifficulty(const Options difficultyOption)
         m_fieldHeight = 8;
         break;
     case EASY:
+        m_bombCount = 40;
         m_fieldWidth = 16;
         m_fieldHeight = 16;
         break;

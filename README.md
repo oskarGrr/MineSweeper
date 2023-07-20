@@ -1,3 +1,7 @@
+On some versions of windows it seems that windows is limiting the smallest window
+size possible when the user has high resolution monitors. You may see black bars on the beginner difficulty of the game.
+I will fix this later. The game should still work fine with the black bars.
+
 I only have 32 bit SFML binaries so compile for 32 bit. 
 If you try to build and run the project, you will need to move the stuff from .sfml/bin/ into the directory where the .exe ended up. 
 A version of minesweeper very similar to the old school looking version from microsoft.
